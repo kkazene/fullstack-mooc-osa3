@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const app = express()
 
 app.use(bodyParser.json())
+app.use(express.static('build'))
 morgan.token('body', function (req, res) {
   return JSON.stringify({ name: req.body.name, number: req.body.number })
 })
@@ -31,10 +32,6 @@ let persons = [
     "id": 4
   }
 ]
-
-app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1>')
-})
 
 app.get('/info', (req, res) => {
   const number = persons.length
