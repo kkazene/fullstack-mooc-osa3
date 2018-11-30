@@ -11,14 +11,6 @@ morgan.token('body', function (req, res) {
 })
 app.use(morgan(':method :url :body :status :res[content-length] - :response-time ms'))
 
-const formatPerson = (person) => {
-  return {
-    name: person.name,
-    number: person.number,
-    id: person._id
-  }
-}
-
 app.get('/info', (req, res) => {
   const number = persons.length
   let message = `<p>puhelinluettelossa ${number} ihmisen tiedot</p>`
@@ -31,7 +23,7 @@ app.get('/api/persons', (req, res) => {
   Person
   .find({})
   .then(people => {
-    res.json(people.map(formatPerson))
+    res.json(people.map(Person.format))
   })
 })
 
