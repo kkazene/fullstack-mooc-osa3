@@ -40,11 +40,19 @@ app.post('/api/persons/', (req, res) => {
   const body = req.body
   if (!body.name || !body.number)
     return res.status(400).json({error: 'person must have name and numb'})
-  if (persons.find(person => person.name === body.name))
-    return res.status(400).json({error: 'name must be unique'})
-  body.id = Math.floor(Math.random() * 777)
-  persons = persons.concat(body)
-  res.json(body)
+  // if (persons.find(person => person.name === body.name))
+  //   return res.status(400).json({error: 'name must be unique'})
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
+    
+  person
+    .save()
+    .then(newPerson => {
+      res.json(Person.format(newPerson))
+    })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
