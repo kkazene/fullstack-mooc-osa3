@@ -12,11 +12,15 @@ morgan.token('body', function (req, res) {
 app.use(morgan(':method :url :body :status :res[content-length] - :response-time ms'))
 
 app.get('/info', (req, res) => {
-  const number = persons.length
-  let message = `<p>puhelinluettelossa ${number} ihmisen tiedot</p>`
-  const date = new Date()
-  message = message + date
-  res.send(message)
+  Person
+  .find({})
+  .then(people => {
+    const number = people.length
+    let message = `<p>puhelinluettelossa ${number} ihmisen tiedot</p>`
+    const date = new Date()
+    message = message + date
+    res.send(message)
+  })
 })
 
 app.get('/api/persons', (req, res) => {
@@ -28,12 +32,18 @@ app.get('/api/persons', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  const person = persons.find(person => person.id === id )
-  if (person)
-    res.send(person)
-  else
-    res.status(404).end()
+  Person
+  .findById(req.params.id)
+  .then(person => {
+    if (person)
+      res.json(Person.format(person))
+    else
+      res.status(404).end()
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(400).send({ error: 'malformatted id'})
+  })
 })
 
 app.post('/api/persons/', (req, res) => {
@@ -55,10 +65,29 @@ app.post('/api/persons/', (req, res) => {
     })
 })
 
+app.put('/api/persons/:id', (req, res) => {
+  const number = req.body.number
+
+  Person
+  .findOneAndUpdate({_id: req.params.id}, {number: number}, { new: true })
+  .then(updatedPerson => {
+    res.json(Person.format(updatedPerson))
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(400).send({ error: 'malformatted id'})
+  })
+})
+
 app.delete('/api/persons/:id', (req, res) => {
-  const id = Number(req.params.id)
-  persons = persons.filter(person => person.id !== id )
-  res.status(204).end()
+  Person
+    .findOneAndDelete({_id: req.params.id})
+    .then(result => {
+      res.status(204).end()
+    })
+    .catch(error => {
+      res.status(400).send({ error: 'malformatted id' })
+    })
 })
 
 const PORT = process.env.PORT || 3001
